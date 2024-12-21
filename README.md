@@ -15,6 +15,9 @@ It is EXTREMELY unlikely that you get banned.
 ## 4. Do I give you access to my account if I run this code?
 No, running the code does not give anyone access to your account. However, it interacts with your account data through the API.
 
+## 5. I get error code 401 help
+Make sure you're logged in on Roblox and refresh your page
+
 
 #
 ### Easiest way to run the code.
