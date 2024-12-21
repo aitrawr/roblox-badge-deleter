@@ -1,4 +1,4 @@
-let uid = "YOUR ROBLOX ID", cToken, wl = ["YOUR BADGE ID YOU WANT TO WHITELIST"]; //USER ID AND BADGE ID YOU WANT TO WHITELIST
+let uid = "YOUR ROBLOX ID", cToken, wl = ["","","","","","badges that u wanna spare add more if needed"]; //USER ID AND BADGE ID YOU WANT TO WHITELIST
 let stop = false, dDelay = 800; // ADJUST DELETION DELAY IF NEEDED
 
 // Confirmation prompt
@@ -48,8 +48,8 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
       return b; 
     },
     estimateTime = (numBadges) => {
-      const timePerBadge = dDelay / 1000; // Convert delay from ms to seconds
-      const totalTime = numBadges * timePerBadge; // Total time in seconds
+      const timePerBadge = dDelay / 1000;
+      const totalTime = numBadges * timePerBadge; 
       const minutes = Math.floor(totalTime / 60);
       const seconds = Math.round(totalTime % 60);
       console.log(`Estimated time to delete all badges: ${minutes} minutes and ${seconds} seconds.`);
@@ -71,11 +71,11 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
         return;
       }
       let b = await gBadges(u); 
-      estimateTime(b.length); // Estimate the time based on the number of badges
+      estimateTime(b.length); 
       console.log("Deleting badges..."); 
       for (let bd of b) { 
         if (stop) { console.log("Deletion process stopped by panic button!"); break; } 
-        if (wl.includes(bd.id.toString())) { // Ensure the badge ID is checked as a string
+        if (wl.includes(bd.id.toString())) { 
           console.log(`Skipped badge ${bd.id} - ${bd.name} (whitelisted)`); 
           continue; 
         } 
@@ -85,7 +85,6 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
       console.log("Badge deletion process finished."); 
     };
 
-// Execute the confirmation and then proceed
 confirmation()
   .then(() => delAll(uid))
   .catch(() => console.log("Badge deletion process has been cancelled."));
