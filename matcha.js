@@ -1,5 +1,6 @@
-let uid = "YOUR ROBLOX ID", cToken, wl = [""]; // put badge id u dont want to delete separate using a comma just dont use a comma when its the last one
-let stop = false, dDelay = 800;
+let uid = "YOUR ROBLOX ID", cToken, wl = ["YOUR BADGE ID YOU WANT TO WHITELIST"]; //USER ID AND BADGE ID YOU WANT TO WHITELIST
+let stop = false, dDelay = 800; // ADJUST DELETION DELAY IF NEEDED
+
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   document.addEventListener("keydown", e => e.key === "p" && (stop = true, console.log("Stopping badge deletion...")));
@@ -35,8 +36,8 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
       return b; 
     },
     estimateTime = (numBadges) => {
-      const timePerBadge = dDelay / 1000; 
-      const totalTime = numBadges * timePerBadge; 
+      const timePerBadge = dDelay / 1000; // Convert delay from ms to seconds
+      const totalTime = numBadges * timePerBadge; // Total time in seconds
       const minutes = Math.floor(totalTime / 60);
       const seconds = Math.round(totalTime % 60);
       console.log(`Estimated time to delete all badges: ${minutes} minutes and ${seconds} seconds.`);
@@ -58,11 +59,14 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
         return;
       }
       let b = await gBadges(u); 
-      estimateTime(b.length); 
+      estimateTime(b.length); // Estimate the time based on the number of badges
       console.log("Deleting badges..."); 
       for (let bd of b) { 
         if (stop) { console.log("Deletion process stopped by panic button!"); break; } 
-        if (wl.includes(bd.id)) { console.log(`Skipped badge ${bd.id} - ${bd.name} (whitelisted)`); continue; } 
+        if (wl.includes(bd.id.toString())) { // Ensure the badge ID is checked as a string
+          console.log(`Skipped badge ${bd.id} - ${bd.name} (whitelisted)`); 
+          continue; 
+        } 
         let s = await delBd(bd.id); 
         s ? (console.log(`Deleted badge ${bd.id} - ${bd.name}`), await slp(dDelay)) : console.warn(`Retrying failed deletion for badge ${bd.id} later.`); 
       } 
