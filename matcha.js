@@ -1,5 +1,5 @@
 let uid = "YOUR ROBLOX ID", cToken, wl = ["example_badgeid1","example_badgeid2","example_badgeid3"]; //add more if you want just keep this format i'm not responsible if you lose rare badges.
-let stop = false, dDelay = 800; // ADJUST DELETION DELAY IF NEEDED
+let stop = false, dDelay = 1200; // ADJUST DELETION DELAY IF NEEDED
 
 // Confirmation prompt
 const confirmation = () => {
@@ -48,7 +48,7 @@ let slp = ms => new Promise(r => setTimeout(r, ms)),
       return b; 
     },
     estimateTime = (numBadges) => {
-      const timePerBadge = dDelay / 1000;
+      const timePerBadge = dDelay / 1500;
       const totalTime = numBadges * timePerBadge; 
       const minutes = Math.floor(totalTime / 60);
       const seconds = Math.round(totalTime % 60);
