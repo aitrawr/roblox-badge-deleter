@@ -1,4 +1,4 @@
-let uid = "YOUR ROBLOX ID", cToken, wl = ["","","","","","badges that u wanna spare add more if needed"]; //USER ID AND BADGE ID YOU WANT TO WHITELIST
+let uid = "YOUR ROBLOX ID", cToken, wl = ["example_badgeid1","example_badgeid2","example_badgeid3"]; //add more if you want just keep this format i'm not responsible if you lose rare badges.
 let stop = false, dDelay = 800; // ADJUST DELETION DELAY IF NEEDED
 
 // Confirmation prompt
