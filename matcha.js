@@ -2,6 +2,17 @@ let uid = "YOUR ROBLOX ID", cToken, wl = ["YOUR BADGE ID YOU WANT TO WHITELIST"]
 let stop = false, dDelay = 800; // ADJUST DELETION DELAY IF NEEDED
 
 
+const confirmation = () => {
+  return new Promise((resolve, reject) => {
+    const userResponse = prompt("Are you sure you want to run this? It will delete all your Roblox badges except for the badges in the whitelist. Please enter 'Yes, I understand'");
+    if (userResponse && userResponse.toLowerCase() === 'yes, i understand') {
+      resolve();
+    } else {
+      console.log("Operation cancelled.");
+      reject();
+    }
+  });
+};
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   document.addEventListener("keydown", e => e.key === "p" && (stop = true, console.log("Stopping badge deletion...")));
 }
