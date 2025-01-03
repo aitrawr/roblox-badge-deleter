@@ -1,5 +1,7 @@
 # roblox-badge-deleter
-using js and your browser console you can delete badges automatically, please this is important to notice that you NEED to run the code in your web browser.
+⚠️IMPORTANT⚠️  run the code in the console of your web browser by pressing ctrl + shift + I or F12, make sure to enter your USER ID in the first lines and the BADGES ID you want to white list.
+
+please this is important to notice that you NEED to run the code in your web browser. it is not made for a traditional IDE, even tho it MIGHT work.
 
 # Q&A
 
