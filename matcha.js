@@ -1,102 +1,103 @@
-let uid = "YOUR ROBLOX ID", cToken, wl = ["example_badgeid1", "example_badgeid2", "example_badgeid3"]; // add more if you want just keep this format i'm not responsible if you lose rare badges.
-let stop = false, dDelay = 1200; // ADJUST DELETION DELAY IF NEEDED
+(() => {
+  let uid = ""; // Your Roblox user ID
+  let wl = [];  // badges ID you want to keep and whitelist ["123456", "789012"]
 
-const confirmation = () => {
-  return new Promise((resolve, reject) => {
-    const userResponse = prompt("Are you sure you want to run this? It will delete all your Roblox badges except for the badges in the whitelist. Please enter 'Yes, I understand'");
-    if (userResponse && userResponse.toLowerCase() === 'yes, i understand') {
-      resolve();
-    } else {
-      console.log("Operation cancelled.");
-      reject();
+  let stop = false;
+  let dDelay = 1200;
+  let cToken = null;
+
+  const slp = ms => new Promise(r => setTimeout(r, ms));
+
+  // Panic button (press "p" to stop)
+  document.addEventListener("keydown", e => {
+    if (e.key === "p") {
+      stop = true;
+      console.log("Stopping...");
     }
   });
-};
 
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  document.addEventListener("keydown", e => e.key === "p" && (stop = true, console.log("Stopping badge deletion...")));
-}
+  async function setTk() {
+    let r = await fetch("https://badges.roblox.com/v1/user/badges/0", {
+      method: "DELETE",
+      headers: { "x-csrf-token": "" },
+      credentials: "include"
+    });
+    cToken = r.headers.get("x-csrf-token");
+    if (cToken) console.log("Token refreshed");
+    else console.error("Could not get CSRF token. Make sure you’re logged in.");
+  }
 
-let slp = ms => new Promise(r => setTimeout(r, ms)),
-    setTk = async () => {
-      let r = await fetch("https://auth.roblox.com/v1/logout", { method: 'POST', headers: { 'accept': 'application/json' }, credentials: 'include' });
-      if (r.status === 200 || r.status === 403) {
-        cToken = r.headers.get("x-csrf-token");
-        if (!cToken) {
-          console.error("CSRF token not found. Make sure you are logged in.");
-        }
-      } else {
-        console.error("Failed to set token, status code:", r.status);
-        if (r.status === 401) {
-          console.error("Authentication failed. Please ensure you are logged in to Roblox.");
-        }
-      }
-    },
-    gBadges = async u => {
-      let b = [], np = "";
-      console.log("Fetching badges...");
-      do {
-        let r = await fetch(`https://badges.roblox.com/v1/users/${u}/badges?limit=10&sortOrder=Desc${np ? `&cursor=${np}` : ''}`, { method: 'GET', headers: { 'accept': 'application/json' } });
-        if (!r.ok) return void console.error(`Failed to fetch badges, status code: ${r.status}`);
-        let d = await r.json();
-        d.data && Array.isArray(d.data) && b.push(...d.data);
-        np = d.nextPageCursor;
-        console.log(`Fetched ${b.length} badges so far...`);
-      } while (np);
-      console.log(`Fetched ${b.length} badges in total.`);
-      return b;
-    },
-    estimateTime = (numBadges) => {
-      const timePerBadge = dDelay / 1500;
-      const totalTime = numBadges * timePerBadge;
-      const minutes = Math.floor(totalTime / 60);
-      const seconds = Math.round(totalTime % 60);
-      console.log(`Estimated time to delete all badges: ${minutes} minutes and ${seconds} seconds.`);
-    },
-    delBd = async bid => {
-      try {
-        let r = await fetch(`https://badges.roblox.com/v1/user/badges/${bid}`, { method: 'DELETE', headers: { 'accept': 'application/json', 'x-csrf-token': cToken }, credentials: 'include' });
-        if (r.status === 429) return console.warn("Too Many Requests detected! doubling the delay. (if you still get 429 stop the program. wait a minute and run it with increased delay.)"), dDelay *= 2, await slp(dDelay), false;
-        if (!r.ok) return console.error(`Failed to delete badge ${bid}, status code: ${r.status}`), false;
-        return true;
-      } catch (e) {
-        return console.error(`Error occurred while deleting badge ${bid}:`, e), false;
-      }
-    },
-    delAll = async u => {
+  async function gBadges(u) {
+    let b = [], np = "";
+    do {
+      let r = await fetch(`https://badges.roblox.com/v1/users/${u}/badges?limit=10&sortOrder=Desc${np ? `&cursor=${np}` : ''}`, {
+        method: "GET",
+        headers: { "accept": "application/json" },
+        credentials: "include"
+      });
+      if (!r.ok) return [];
+      let d = await r.json();
+      b.push(...d.data);
+      np = d.nextPageCursor;
+    } while (np);
+    console.log(`Fetched ${b.length} badges.`);
+    return b;
+  }
+
+  async function delBd(bid) {
+    let r = await fetch(`https://badges.roblox.com/v1/user/badges/${bid}`, {
+      method: "DELETE",
+      headers: { "x-csrf-token": cToken },
+      credentials: "include"
+    });
+
+    if (r.status === 403) {
+      console.warn("403 → refreshing token...");
       await setTk();
-      if (!cToken) {
-        console.error("Cannot proceed to delete badges. CSRF token is not set.");
-        return;
-      }
-      let b = await gBadges(u);
-      estimateTime(b.length);
-      console.log("Deleting badges...");
-      
-      let deletedCount = 0; 
-      for (let bd of b) {
-        if (stop) { console.log("Deletion process stopped by panic button!"); break; }
-        if (wl.includes(bd.id.toString())) {
-          console.log(`Skipped badge ${bd.id} - ${bd.name} (whitelisted)`);
-          continue;
-        }
-        let s = await delBd(bd.id);
-        if (s) {
-          console.log(`Deleted badge ${bd.id} - ${bd.name}`);
-          deletedCount++;
-          await slp(dDelay);
-          
-          if (deletedCount % 20 === 0) {
-            console.log("Pausing for 20seconds to avoid rate limiting. Please wait");
-            await slp(20000);
-          }
-        } else {
-          console.warn(`Retrying failed deletion for badge ${bd.id} later.`);
-        }
-      }
-      console.log("Badge deletion process finished.");
-    };
+      return delBd(bid);
+    }
+    if (r.status === 429) {
+      console.warn("Rate limit → increasing delay");
+      dDelay *= 2;
+      await slp(dDelay);
+      return false;
+    }
+    if (!r.ok) return false;
+    return true;
+  }
 
-confirmation()
-  .then(() => delAll(uid))
-  .catch(() => console.log("Badge deletion process has been cancelled."));
+  async function delAll(u) {
+    await setTk();
+    if (!cToken) return;
+
+    let badges = await gBadges(u);
+    console.log("Starting deletions...");
+
+    let deleted = 0;
+    for (let bd of badges) {
+      if (stop) break;
+      if (wl.includes(bd.id.toString())) {
+        console.log(`Skipped ${bd.id} (${bd.name})`);
+        continue;
+      }
+      let ok = await delBd(bd.id);
+      if (ok) {
+        console.log(`Deleted ${bd.id} (${bd.name})`);
+        deleted++;
+        await slp(dDelay);
+        if (deleted % 20 === 0) {
+          console.log("Cooling down 20s...");
+          await slp(20000);
+        }
+      }
+    }
+    console.log("Done.");
+  }
+
+  const res = prompt("Delete all badges except whitelist? Type 'Yes, I understand' to confirm.");
+  if (res && res.toLowerCase() === "yes, i understand") {
+    delAll(uid);
+  } else {
+    console.log("Cancelled.");
+  }
+})();
